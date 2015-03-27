@@ -118,22 +118,31 @@ function formatBody(parent,files){
 /**
  * 如果文件找不到，显示404错误
  */
-function write404(req,res){
+function write404(req, res){
+
     var body="文件不存在:-(";
-    res.writeHead(404,{
+
+    res.writeHead(404, {
+
         "Content-Type":"text/html;charset=utf-8",
+
         "Content-Length":Buffer.byteLength(body,'utf8'),
+
         "Server":"NodeJs("+process.version+")"
+
     });
+
     res.write(body);
+
     res.end();
+
 }
 
 /**
  * 判断文件是否存在,路径问题是否带有“/”
  */
  var exists_i = 0;
-function existsFile(filename,req,res,pathname){
+function existsFile(filename, req, res, pathname){
 			//console.log(filename , 'asdfasd_____________-');
 			// console.log(filename.split('\\'),'asdfasfasdfsadf_+_+_+_+_+_+_');
 			// console.log(pathname);
@@ -141,24 +150,33 @@ function existsFile(filename,req,res,pathname){
 	  //       exists_i++;
 	  //       console.log(exists_i);
 
-	    path.exists(filename,function(exists){
-            if(!exists){
+	    path.exists(filename, function(exists) {
 
+            if (!exists) {
 
                 util.error('找不到文件'+filename);
+
                 write404(req,res);
-            }else{
+
+            } else {
 
                 fs.stat(filename,function(err,stat){
-                    if(stat.isFile()){
-                        showFile(filename,req,res);
-                    }else if(stat.isDirectory()){
+
+                    if (stat.isFile()) {
+
+                        showFile(filename, req, res);
+
+                    } else if (stat.isDirectory()){
 
 		                if (filename.charAt(filename.length -1) != '\\') {
-							 res.writeHead(302,{
+
+							res.writeHead(302, {
+
 						        "Location":pathname+'/'
+
 						    });
-							 res.end();
+
+							res.end();
 							 //return ;
                     	}
 
@@ -173,41 +191,69 @@ function existsFile(filename,req,res,pathname){
  * 如果是combo
  */
 function comboPress (pathname, req,res) {
+
 	var hashStr = req.url;
+
 	var hash = require("crypto").createHash('sha1').update(hashStr).digest('base64');
+
 	var filename = [];
+
 	for (var i = 0; i < pathname.length; i++) {
-		var temp = path.join(root,pathname[i]);
+
+		var temp = path.join(root, pathname[i]);
+
 		filename.push(temp);
+
 	}
 
 	var temp_file = '';
 
 	function seqRequest(i,limit){
-		fs.exists(filename[i], function( exists ){
+
+		fs.exists(filename[i], function( exists ) {
+
 			if (exists) {
+
 				fs.readFile(filename[i],'utf-8', function (err, file) {
+
 					if (err == null) {
 						
 						temp_file += file;
 
 						if (i < limit) {
-							seqRequest(i+1,filename.length-1);
+
+							seqRequest(i + 1, filename.length - 1);
+
 						} else {
-							var contentType=mime.lookupExtension(path.extname(temp_file));
-							if(req.headers['if-none-match'] == hash){
+
+							var contentType = mime.lookupExtension(path.extname(temp_file));
+
+							if (req.headers['if-none-match'] == hash) {
+
 								res.writeHead(304);
+
 								res.end();
+
 								return;
+
 							}
+
 					        res.writeHead(200,{
+
 					            "Content-Type":contentType,
+
 					            "Content-Length":Buffer.byteLength(temp_file,'utf-8'),
+
 					            "Server":"NodeJs("+process.version+")",
+
 					            "Etag" : hash
+
 					        });
+
 					        res.write(temp_file,"utf-8");
+
 					        res.end();
+
 						}
 					}
 				});
@@ -223,20 +269,32 @@ function comboPress (pathname, req,res) {
  * 创建服务器
  */
 http.createServer(function(req,res){
+
     //将url地址的中的%20替换为空格，不然Node.js找不到文件
+
     var pathname=url.parse(req.url).pathname.replace(/%20/g,' '),
+
         re=/(%[0-9A-Fa-f]{2}){3}/g;
+
 	var hashStr = req.url;
+
 	var hash = require("crypto").createHash('sha1').update(hashStr).digest('base64');
 
     //能够正确显示中文，将三字节的字符转换为utf-8编码
     pathname=pathname.replace(re,function(word){
+
         var buffer=new Buffer(3),
+
             array=word.split('%');
-        array.splice(0,1);
-        array.forEach(function(val,index){
-            buffer[index]=parseInt('0x'+val,16);
+
+        array.splice(0, 1);
+
+        array.forEach(function(val, index){
+
+            buffer[index]=parseInt('0x'+val, 16);
+
         });
+
         return buffer.toString('utf8');
     });
 
@@ -244,23 +302,6 @@ http.createServer(function(req,res){
     //pathname = url.resolve(pathname,mock_online_address);
 
     //pathname = ['/t1.js','/t2.js','/t3.js'];
-
-    if (req.url.indexOf("??") == 1) {
-		var arr = req.url.split("??")[1].split(',');
-		var files = [];
-
-		arr.forEach(function (v, k) {
-	    	files.push('/'+v);
-		});
-
-		pathname = files;
-
-		for (var i = 0; i < pathname.length; i++) {
-			//console.log(pathname[i].split("?"),'pathname[i].split("?")');
-			pathname[i] = pathname[i].split("?")[0];
-		}
-
-	} 
 
 	function getFileName(str){
 
@@ -277,34 +318,73 @@ http.createServer(function(req,res){
 
 	console.log(getFileName(pathname),'asdfasdfasdfasdfasdf');
 
-
-
-
 	pathname = getFileName(pathname);
 
 	if (url.parse(req.url).pathname.split(pathname)[0] === mock_online_address) {
-		pathname = '/' + pathname;
-	} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
-		pathname = '/';
-	} else {
-		console.log('other');
-	}
-	
 
+		pathname = '/' + pathname;
+
+	} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
+
+		pathname = '/';
+
+	} else {
+
+		console.log('other');
+
+	}
+
+
+	if (req.url.indexOf("??") == 1) {
+
+		var arr = req.url.split("??")[1].split(',');
+
+		console.log(arr);
+
+		var files = [];
+
+		arr.forEach(function (v, k) {
+
+	    	files.push('/'+v);
+
+		});
+
+		pathname = files;
+
+		for (var i = 0; i < pathname.length; i++) {
+
+			//console.log(pathname[i].split("?"),'pathname[i].split("?")');
+			pathname[i] = pathname[i].split("?")[0];
+
+		}
+	}
+
+	console.log(pathname);
+	
     if (pathname=='/') {
+
         listDirectory(root,req,res);
+
     } else {
+
     	//如果等于1,url就是有??
     	if (req.url.indexOf("??") == 1) {
+
     		comboPress(pathname, req, res);
+
     	} else {
+
     		filename=path.join(root,pathname);
+
         	existsFile(filename,req,res,pathname);
+
     	}
     }
 
-}).listen(local_port,local_host).on('close',function (stat) {
+}).listen(local_port, local_host).on('close',function (stat) {
+
 	console.log(stat);
+
 });
 
 /**
