@@ -20,6 +20,7 @@ var fs=require("fs"),
 
 var root=__dirname;
 
+console.log(root,'rootrootrootroot');
 /** 
  * 配置abc.json
  */
@@ -127,12 +128,23 @@ function write404(req,res){
     res.write(body);
     res.end();
 }
+
 /**
  * 判断文件是否存在,路径问题是否带有“/”
  */
-function existsFile(filename,req,res){
-	        path.exists(filename,function(exists){
+ var exists_i = 0;
+function existsFile(filename,req,res,pathname){
+			//console.log(filename , 'asdfasd_____________-');
+			// console.log(filename.split('\\'),'asdfasfasdfsadf_+_+_+_+_+_+_');
+			// console.log(pathname);
+
+	  //       exists_i++;
+	  //       console.log(exists_i);
+
+	    path.exists(filename,function(exists){
             if(!exists){
+
+
                 util.error('找不到文件'+filename);
                 write404(req,res);
             }else{
@@ -143,13 +155,12 @@ function existsFile(filename,req,res){
                     }else if(stat.isDirectory()){
 
 		                if (filename.charAt(filename.length -1) != '\\') {
-
 							 res.writeHead(302,{
 						        "Location":pathname+'/'
 						    });
 							 res.end();
 							 //return ;
-                    	} 
+                    	}
 
                         listDirectory(filename,req,res);
                     }
@@ -229,6 +240,9 @@ http.createServer(function(req,res){
         return buffer.toString('utf8');
     });
 
+	//pathname = '/';
+    //pathname = url.resolve(pathname,mock_online_address);
+
     //pathname = ['/t1.js','/t2.js','/t3.js'];
 
     if (req.url.indexOf("??") == 1) {
@@ -248,6 +262,34 @@ http.createServer(function(req,res){
 
 	} 
 
+	function getFileName(str){
+
+		var reg = /[^\\\/]*[\\\/]+/g;
+
+		//xxx\或者是xxx/
+
+		str = str.replace(reg,'');
+
+		return str;
+
+	}
+
+
+	console.log(getFileName(pathname),'asdfasdfasdfasdfasdf');
+
+
+
+
+	pathname = getFileName(pathname);
+
+	if (url.parse(req.url).pathname.split(pathname)[0] === mock_online_address) {
+		pathname = '/' + pathname;
+	} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
+		pathname = '/';
+	} else {
+		console.log('other');
+	}
+	
 
     if (pathname=='/') {
         listDirectory(root,req,res);
@@ -257,7 +299,7 @@ http.createServer(function(req,res){
     		comboPress(pathname, req, res);
     	} else {
     		filename=path.join(root,pathname);
-        	existsFile(filename,req,res);
+        	existsFile(filename,req,res,pathname);
     	}
     }
 
@@ -268,4 +310,4 @@ http.createServer(function(req,res){
 /**
  * 服务器开启提示
  */
-util.debug("服务器开始运行 http://"+local_host+":"+local_port);
+util.debug("服务器开始运行 http://"+local_host+":"+local_port+mock_online_address);
