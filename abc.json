@@ -2,6 +2,6 @@
 	"mock_online_address": "/min/static/giftCenter/",
 	"online_host": "img1sw.baidu.com",
 	"online_port": "80",
-	"local_host": "qihong.baidu.com",
+	"local_host": "hawk.baidu.com",
 	"local_port": "8888"
 }

@@ -6,6 +6,28 @@
  *			 http://127.0.0.1/??t1.js,t2.js?t=333332323,t3.js
  */
 
+/**
+ * 依赖的模块
+ */
+
+
+
+
+var chalk = require('chalk');
+
+
+
+console.log(chalk.red(" __                             __"));
+console.log(chalk.yellow("/\\ \\                           /\\ \\"));
+console.log(chalk.green("\\ \\ \\___      __     __  __  __\\ \\ \\/'\\"));
+console.log(chalk.cyan(" \\ \\  _ `\\  /'__`\\  /\\ \\/\\ \\/\\ \\\\ \\ , <"));
+console.log(chalk.gray("  \\ \\ \\ \\ \\/\\ \\L\\.\\_\\ \\ \\_/ \\_/ \\\\ \\ \\\\`\\"));
+console.log(chalk.white("   \\ \\_\\ \\_\\ \\__/.\\_\\\\ \\___x___/' \\ \\_\\ \\_\\"));
+console.log(chalk.blue("    \\\/_/\\/_/\\/__/\\/_/ \\/__//__/    \\/_/\\/_/")+'	'+chalk.bgWhite(chalk.black("v0.0.1")));
+console.log('\n');
+
+
+
 
 var fs = require("fs"),
 
@@ -25,11 +47,21 @@ var fs = require("fs"),
 
 var root=__dirname;
 
+
+if (!path.existsSync(root)) {
+
+    util.error(root+"文件夹不存在，请重新制定根文件夹！");
+
+    process.exit();
+
+}
 /** 
  * 配置abc.json
  */
 
 var abc=JSON.parse(fs.readFileSync('./abc.json','utf-8'));
+
+
 
 var mock_online_address = abc.mock_online_address;
 
@@ -40,14 +72,7 @@ var online_port = abc.online_port;
 var local_host = abc.local_host;
 
 var local_port = abc.local_port;
-    
-if (!path.existsSync(root)) {
 
-    util.error(root+"文件夹不存在，请重新制定根文件夹！");
-
-    process.exit();
-
-}
     
 /**
  * 显示文件夹下面的文件
@@ -277,13 +302,6 @@ function comboPress (pathname, req,res) {
 		pathname[i] = filename_source[i].split(mock_online_address)[1];
 		 
 
-		console.log(filename_source[i],'adsfasdf');
-
-		
-
-
-		console.log(pathname[i],i);
-
 		if (pathname[i] == undefined) {
 
 			//取线上
@@ -306,7 +324,6 @@ function comboPress (pathname, req,res) {
 	var temp_file = '';
 
 	function seqRequest(i, limit) {
-		console.log(filename[i],'------------------------');
 		 filename_t[i] = filename[i];
 		fs.exists(filename[i], function( exists ) {
 
@@ -376,9 +393,6 @@ function comboPress (pathname, req,res) {
 				});
 			} else {
 
-				// console.log(filename_source[i],'&&&&&&&&');
-				// console.log(temp_file);
-				// console.log(online_host+':'+online_port+filename_source[i]);
 				var reqData='';
 				var post_options = {
 				    host: online_host,
@@ -392,8 +406,6 @@ function comboPress (pathname, req,res) {
 				  };
 					//http.get('http://'+online_host+':'+online_port+filename_source[i], function (res) {
 					http.get('http://' + online_host + ':' + filename_source[i], function (response) {
-
-						console.log(response.statusCode);
 
 						if (response.statusCode == 404) {
 							var body="文件不存在:-(";
@@ -449,30 +461,24 @@ function comboPress (pathname, req,res) {
 					});
 
 
-
-   
-   
-
 				//url combo的文件没有找到怎么办
 
-				// console.log(filename);
-				// console.log(pathname);
 
-				    // var body="文件不存在:-(";
+				    var body="文件不存在:-(";
 
-				    // res.writeHead(404, {
+				    res.writeHead(404, {
 
-				    //     "Content-Type":"text/html;charset=utf-8",
+				        "Content-Type":"text/html;charset=utf-8",
 
-				    //     "Content-Length":Buffer.byteLength(body,'utf8'),
+				        "Content-Length":Buffer.byteLength(body,'utf8'),
 
-				    //     "Server":"NodeJs(" + process.version + ")"
+				        "Server":"NodeJs(" + process.version + ")"
 
-				    // });
+				    });
 
-				    // res.write(body);
+				    res.write(body);
 
-				    // res.end();
+				    res.end();
 			}
 
 		});
@@ -483,179 +489,225 @@ function comboPress (pathname, req,res) {
 	
 }
 
+
+function serverStart() {
 /**
  * 创建服务器
  */
+
+
 http.createServer(function (req, res) {
 
-    //将url地址的中的%20替换为空格，不然Node.js找不到文件
+	    //将url地址的中的%20替换为空格，不然Node.js找不到文件
 
-    var pathname=url.parse(req.url).pathname.replace(/%20/g,' '),
+	    var pathname=url.parse(req.url).pathname.replace(/%20/g,' '),
 
-        re=/(%[0-9A-Fa-f]{2}){3}/g;
+	        re=/(%[0-9A-Fa-f]{2}){3}/g;
 
-	var hashStr = req.url;
+		var hashStr = req.url;
 
-	var hash = require("crypto").createHash('sha1').update(hashStr).digest('base64');
+		var hash = require("crypto").createHash('sha1').update(hashStr).digest('base64');
 
-    //能够正确显示中文，将三字节的字符转换为utf-8编码
-    pathname=pathname.replace(re, function (word) {
+	    //能够正确显示中文，将三字节的字符转换为utf-8编码
+	    pathname=pathname.replace(re, function (word) {
 
-        var buffer = new Buffer(3),
+	        var buffer = new Buffer(3),
 
-            array = word.split('%');
+	            array = word.split('%');
 
-        array.splice(0, 1);
+	        array.splice(0, 1);
 
-        array.forEach(function (val, index) {
+	        array.forEach(function (val, index) {
 
-            buffer[index]=parseInt('0x'+val, 16);
+	            buffer[index]=parseInt('0x'+val, 16);
 
-        });
+	        });
 
-        return buffer.toString('utf8');
+	        return buffer.toString('utf8');
 
-    });
-
-
-	pathname = getFileName(pathname);
+	    });
 
 
-	if (url.parse(req.url).pathname.split(mock_online_address)[1] == undefined) {
-
-		if (url.parse(req.url).pathname.split(pathname)[0] === mock_online_address) {
-
-			pathname = url.parse(req.url).pathname.split(mock_online_address)[0] + pathname;
-			
-		} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
+		pathname = getFileName(pathname);
 
 
-			var mock_online_address_temp = mock_online_address.substr(1,mock_online_address.length);
+		if (url.parse(req.url).pathname.split(mock_online_address)[1] == undefined) {
 
-			if (url.parse(req.url).path.indexOf(mock_online_address_temp) > 0) {
+			if (url.parse(req.url).pathname.split(pathname)[0] === mock_online_address) {
 
-				pathname = url.parse(req.url).pathname.split(mock_online_address)[0];
+				pathname = url.parse(req.url).pathname.split(mock_online_address)[0] + pathname;
+				
+			} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
+
+
+				var mock_online_address_temp = mock_online_address.substr(1,mock_online_address.length);
+
+				if (url.parse(req.url).path.indexOf(mock_online_address_temp) > 0) {
+
+					pathname = url.parse(req.url).pathname.split(mock_online_address)[0];
+
+				} else {
+
+					var body="文件不存在:-(";
+
+				    res.writeHead(404, {
+
+				        "Content-Type":"text/html;charset=utf-8",
+
+				        "Content-Length":Buffer.byteLength(body,'utf8'),
+
+				        "Server":"NodeJs(" + process.version + ")"
+
+				    });
+
+				    res.write(body);
+
+				    res.end();
+				}
+
+			} else {
+
+				var mock_online_address_temp = mock_online_address.substr(1,mock_online_address.length);
+
+				if (url.parse(req.url).path.indexOf(mock_online_address_temp) > 0) {
+
+					pathname = url.parse(req.url).pathname.split(mock_online_address)[0];
+
+				} else {
+					var body="文件不存在:-(";
+
+				    res.writeHead(404, {
+
+				        "Content-Type":"text/html;charset=utf-8",
+
+				        "Content-Length":Buffer.byteLength(body,'utf8'),
+
+				        "Server":"NodeJs(" + process.version + ")"
+
+				    });
+
+				    res.write(body);
+
+				    res.end();
+				}
+
+			}
+		} else {
+
+			if (url.parse(req.url).pathname.split(pathname)[0] === mock_online_address) {
+
+				pathname = '/' + pathname;
+
+			} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
+
+
+				pathname = url.parse(req.url).pathname.split(mock_online_address)[1];
 
 			} else {
 
-				// var body="文件不存在:-(";
+				//把文件和路径切出来
 
-			 //    res.writeHead(404, {
+				pathname = url.parse(req.url).pathname.split(mock_online_address)[1];
 
-			 //        "Content-Type":"text/html;charset=utf-8",
-
-			 //        "Content-Length":Buffer.byteLength(body,'utf8'),
-
-			 //        "Server":"NodeJs(" + process.version + ")"
-
-			 //    });
-
-			 //    res.write(body);
-
-			 //    res.end();
 			}
+		}
 
-		} else {
 
-			var mock_online_address_temp = mock_online_address.substr(1,mock_online_address.length);
+		if (req.url.indexOf("??") == 1) {
 
-			if (url.parse(req.url).path.indexOf(mock_online_address_temp) > 0) {
+			var arr = req.url.split("??")[1].split(',');
 
-				pathname = url.parse(req.url).pathname.split(mock_online_address)[0];
+			var files = [];
 
-			} else {
-				var body="文件不存在:-(";
+			arr.forEach(function (v, k) {
 
-			    res.writeHead(404, {
+		    	files.push('/'+v);
 
-			        "Content-Type":"text/html;charset=utf-8",
+			});
 
-			        "Content-Length":Buffer.byteLength(body,'utf8'),
 
-			        "Server":"NodeJs(" + process.version + ")"
 
-			    });
+			pathname = files;
 
-			    res.write(body);
+			for (var i = 0; i < pathname.length; i++) {
 
-			    res.end();
+				pathname[i] = pathname[i].split("?")[0];
+
 			}
-
 		}
-	} else {
-
-		if (url.parse(req.url).pathname.split(pathname)[0] === mock_online_address) {
-
-			pathname = '/' + pathname;
-
-		} else if (url.parse(req.url).pathname.split(pathname)[0] === '/') {
-
-
-			pathname = url.parse(req.url).pathname.split(mock_online_address)[1];
-
-		} else {
-			//console.log(url.parse(req.url).pathname.split(mock_online_address)[1]);
-			//把文件和路径切出来
-
-			pathname = url.parse(req.url).pathname.split(mock_online_address)[1];
-
-		}
-	}
-
-
-	if (req.url.indexOf("??") == 1) {
-
-		var arr = req.url.split("??")[1].split(',');
-
-		var files = [];
-
-		arr.forEach(function (v, k) {
-
-	    	files.push('/'+v);
-
-		});
-
-		//console.log(files,'files');
-
-		pathname = files;
-
-		for (var i = 0; i < pathname.length; i++) {
-
-			pathname[i] = pathname[i].split("?")[0];
-
-		}
-	}
 
 
 
-    if (pathname=='/') {
+	    if (pathname=='/') {
 
-        listDirectory(root,req,res);
+	        listDirectory(root,req,res);
 
-    } else {
+	    } else {
 
-    	//如果等于1,url就是有??
-    	if (req.url.indexOf("??") == 1) {
-    		 console.log(pathname,'????????????');
-    		comboPress(pathname, req, res);
+	    	//如果等于1,url就是有??
+	    	if (req.url.indexOf("??") == 1) {
 
-    	} else {
+	    		comboPress(pathname, req, res);
 
-    		filename=path.join(root,pathname);
+	    	} else {
 
-        	existsFile(filename,req,res,pathname);
+	    		filename=path.join(root,pathname);
 
-    	}
+	        	existsFile(filename,req,res,pathname);
 
-    }
+	    	}
 
-}).listen(local_port, local_host).on('close',function (stat) {
+	    }
 
-	console.log(stat);
+	}).listen(local_port, local_host).on('close',function (stat) {
 
-});
+		console.log(stat);
+
+	});
+} 
+
+
+serverStart();
+
+
+
+
+
+
+
+
+
+// __                             __
+// /\ \                           /\ \
+// \ \ \___      __     __  __  __\ \ \/'\
+//  \ \  _ `\  /'__`\  /\ \/\ \/\ \\ \ , <
+//   \ \ \ \ \/\ \L\.\_\ \ \_/ \_/ \\ \ \\`\
+//    \ \_\ \_\ \__/.\_\\ \___x___/' \ \_\ \_\
+//     \/_/\/_/\/__/\/_/ \/__//__/    \/_/\/_/
 
 /**
  * 服务器开启提示
  */
-util.debug("服务器开始运行 http://"+local_host+":"+local_port+mock_online_address);
+
+ 	console.log('\n');
+ 	var mock_online_address_temp = mock_online_address.substr(1,mock_online_address.length);
+	util.debug(
+
+
+		chalk.blue("服务器开始运行 ")+chalk.cyan('复制根目录地址访问：')+chalk.bgRed("http://"+local_host+":"+local_port+mock_online_address)+'\n'+
+		chalk.blue('combo功能示例^_^：') + chalk.bgRed("http://"+local_host+":"+local_port + '/??' + mock_online_address_temp+'t1.js,'+mock_online_address_temp+'t2.js')+'\n'+
+		chalk.blue('关闭按：')+chalk.green('ctrl+c\n')+
+		chalk.blue('配置文件在根目录：')+chalk.green('abc.json')+'\n'+
+		chalk.blue('abc.json配置文件：\n')+chalk.green(JSON.stringify({
+												"mock_online_address":mock_online_address ,
+												"online_host": online_host,
+												"online_port": 80,
+												"local_host": local_host,
+												"local_port": local_port
+											}, null, 4))+'\n'
+
+	);
+
+// chalk.blue('Hello world!');
+// chalk.bgBlack('aldskjfalsdjf;ads');
+
