@@ -160,11 +160,14 @@ function formatBody(parent, files) {
 
     res.push("<meta http-equiv='Content-Type' content='text/html;charset=utf-8'></meta>");
 
-    res.push("<title>Node.js文件服务器</title>");
+    res.push("<title>hawk前端开发http服务器</title>");
 
     res.push("</head>");
 
     res.push("<body width='100%'>");
+     res.push("<div style='position:relative;width:98%;bottom:5px;height:25px;background:cyan;'>");
+
+    res.push("<div style='margin:0 auto;height:100%;line-height:25px;text-align:center;color:gray; font-family:微软雅黑,黑体'>hawk-前端开发http模块</div>");
 
     res.push("<ul>");
 
@@ -182,15 +185,13 @@ function formatBody(parent, files) {
 
         }
 
-        res.push("<li><a href='"+val+"'>"+val+"</a></li>");
+        res.push("<li><a style='color:black' href='"+val+"'>"+val+"</a></li>");
 
     });
 
     res.push("</ul>");
 
-    res.push("<div style='position:relative;width:98%;bottom:5px;height:25px;background:yellow;'>");
-
-    res.push("<div style='margin:0 auto;height:100%;line-height:25px;text-align:center'>Powered By Node.js</div>");
+   
 
     res.push("</div>");
 
@@ -429,10 +430,7 @@ function comboPress (pathname, req,res) {
 
 
 
-				         
-				 
 				         response.on("data",function (chunk) {
-				 
 				             temp_file += chunk;
 				 
 				         }).on("end", function () {
@@ -452,7 +450,7 @@ function comboPress (pathname, req,res) {
 						    res.end();
 				 
 				         }).on('error', function (e) {
-				 
+				 			
 				             console.log("Got error: " + e.message);
 				 
 				         });
@@ -464,21 +462,21 @@ function comboPress (pathname, req,res) {
 				//url combo的文件没有找到怎么办
 
 
-				    var body="文件不存在:-(";
+				    // var body="文件不存在:-(";
 
-				    res.writeHead(404, {
+				    // res.writeHead(404, {
 
-				        "Content-Type":"text/html;charset=utf-8",
+				    //     "Content-Type":"text/html;charset=utf-8",
 
-				        "Content-Length":Buffer.byteLength(body,'utf8'),
+				    //     "Content-Length":Buffer.byteLength(body,'utf8'),
 
-				        "Server":"NodeJs(" + process.version + ")"
+				    //     "Server":"NodeJs(" + process.version + ")"
 
-				    });
+				    // });
 
-				    res.write(body);
+				    // res.write(body);
 
-				    res.end();
+				    // res.end();
 			}
 
 		});

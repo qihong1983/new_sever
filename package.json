@@ -1,0 +1,25 @@
+{
+  "name": "hawk-combo",
+  "version": "0.0.1",
+  "description": "http-combo",
+  "main": "filesystem.js",
+  "dependencies": {
+    "prompt": "^0.2.14",
+    "a_prompt": "^0.0.2",
+    "chalk": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qihong1983/new_sever.git"
+  },
+  "author": "qihong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qihong1983/new_sever/issues"
+  },
+  "homepage": "https://github.com/qihong1983/new_sever"
+}
