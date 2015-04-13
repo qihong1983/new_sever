@@ -43,7 +43,7 @@ var fs = require("fs"),
 
 /**
  * www根目录
- */
+ */	
 
 var root=__dirname;
 
@@ -287,7 +287,6 @@ function getFileName(str){
  * 如果是combo
  */
 function comboPress (pathname, req,res) {
-
 
 	var hashStr = req.url;
 
