@@ -41,6 +41,8 @@ var fs = require("fs"),
 
     util = require('util');
 
+    var async = require("async");
+
 /**
  * www根目录
  */	
