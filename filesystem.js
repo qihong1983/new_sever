@@ -41,6 +41,7 @@ var fs = require("fs"),
 
     util = require('util');
 
+    var concat = require('concat');
     var async = require("async");
     var a_json  = {};
 
@@ -83,6 +84,8 @@ var online_port = abc.online_port;
 var local_host = abc.local_host;
 
 var local_port = abc.local_port;
+
+
 
     
 /**
@@ -300,7 +303,11 @@ function getFileName(str){
  */
 function comboPress (pathname, req,res) {
 
+	global.req = req;
+ 
+	var hashStr = req.url;
 
+	var hash = require("crypto").createHash('sha1').update(hashStr).digest('base64');
 	
 	res.setMaxListeners(113100090909090909090909);
 
@@ -356,11 +363,11 @@ function comboPress (pathname, req,res) {
 //var path_arr = [ '/min/static/fa/js/home.js','/test1.js','/min/common/js/sea/sea.js', '/test2.js'];
 	//console.log(combo_url);
 	//console.log(path_arr);
-	console.log(combo_url);
+	//console.log(combo_url);
 	combo_url.forEach(function (filepath, index) {
 		//console.log(__dirname+filepath);
     var k = 'a'+index;
-    console.log(k);
+    //console.log(k);
     a_json[filepath] = function (callback) {
     	//console.log(__dirname+filepath);
         fs.readFile(__dirname+filepath, 'binary',  function (err, file_content) {
@@ -382,8 +389,8 @@ function getOnlineContent(o) {
         };
         http.get(options, function (res) {
         	
-        	res.setMaxListeners(100000000000);
-
+        	res.setMaxListeners(100);
+        	//global.res = res;
             console.log('状态友：' + res.statusCode);
             if (res.statusCode == 404) {
             	write404(global.req, global.res);
@@ -392,35 +399,57 @@ function getOnlineContent(o) {
             } else if (res.statusCode == 200) {
 
 	            // console.log('响应头：' + JSON.stringify(res.headers));
-	            res.setEncoding('utf8');
+	          //  console.log('响应头：' + JSON.stringify(res.headers))
+
+	            //res.setEncoding('utf8');
 	            var chunks = [];
 	            var content = '';
-	            var size = 0;  
-	            res.on('data', function (chunk) {
+	            var size = 0;
 
+	            console.log(global.combo_file_object,'aaaaaaaaaaaaaaaaaaaa');  
+	            res.setEncoding('utf8');
+	            res.on('data', function (chunk) {
+	            	console.log(11111111111111);
 	                content += chunk;
 	                chunks.push(chunk);
 
-	                res.on('end', function () {
-	                    size = size + 1;
-	                    chunks.length;
-	                    global.combo_file_object[o] = '';
+	               // Buffer.concat(chunks);
 
-	                    global.combo_file_object[o] = content;
+	            });
 
-	                    if (size == chunks.length) {
+	            res.on('end', function () {
+	            		// console.log(222222222222222222222,'+++++++++++++++++++++');
+	                     size = size + 1;
+	              //       chunks.length;
+	                   // global.combo_file_object[o] = '';
+
+	                    global.combo_file_object[o] = ' '+content+ ' ';
+
+	                    //console.log(global.combo_file_object);
+
+	                    //console.log(content);
+//	                    if (size == chunks.length) {
 	                    	//console.log('resetsonresetsonresetsonresetsonresetsonresetson');
 	                    	//console.log(req.headers['if-none-match']);
-	                        resetJson(global.combo_file_object,req,res);        
+	                    	//console.log(global.combo_file_object);
+	                    	//Buffer(global.combo_file_object);
+	                    	console.log(size);
+	                        resetJson(global.combo_file_object);
 
-	                    }
-	                    return ;
+
+
+
+//	                    }
+	                    //return ;
 	                });
+
+
+
+	                
 
 	                res.on('error', function () {
 	                    console.log('\n\nerror\n\n');
 	                });
-	            });
             }
 
         });
@@ -430,11 +459,19 @@ function getOnlineContent(o) {
 global.json_object_mumber = 0;
 
 function resetJson(obj) {
-    global.json_object_mumber++;
 
+	console.log(obj,'asdfasdfasdfdsa')
+	//console.log(obj);
+    global.json_object_mumber++;
+    console.log(global.json_object_mumber,'global.json_object_mumber');
+    console.log(global.json_undefined_total);
+    console.log(global.json_undefined_total,'global.json_undefined_total');
     if (global.json_object_mumber == global.json_undefined_total) {
 
         global.combo_file_object = obj;
+
+
+		//global.json_object_mumber = 0;        
         getLastContent();
     }
 }
@@ -446,26 +483,47 @@ function getLastContent() {
         last_res += global.combo_file_object[o];
     }
 
+		var content10 = last_res;
+		//console.log(Buffer(content10).toString(),'asdfasdfasdfasdfasdf');
+		// Buffer.concat(content10, Buffer.byteLength(content10, 'utf8'));
+Buffer("this is text concat test !");
+		
+ 		if(global.req.headers['if-none-match'] == hash) {
 
+			res.writeHead(304);
 
+			res.end();
+
+			return;
+
+		}
+		console.log(res);
         res.writeHead(200, {
 
             "Content-Type" : "text/plain;charset=utf-8",
 
-            "Content-Length" : Buffer.byteLength(last_res, 'utf8'),
-			
+            //"Content-Length" : Buffer.byteLength(content10, 'utf8'),
+			"Content-Length" : Buffer.byteLength(content10, 'utf8'),
 
            // 11334
 
-            "Server":"NodeJs(" + process.version + ")"
+            "Server":"NodeJs(" + process.version + ")",
+
+            "Etag" : hash
 
         });
 
-        res.write(last_res, 'utf8');
-
+       // console.log(Buffer(content10).toString(),'asdfasdfasdfasdfasdf');
+        
+        //console.log(content10,'asdfasdfasdfasdfasdfs');
+        
+        res.write(content10, 'utf8');
+       //res.write(Buffer.toString());
+        //console.log(content10);
+        console.log(Buffer);
         //console.log(last_res);
 
-        res.end(last_res, 'utf8');
+        res.end();
         last_res = '';
    // console.log(last_res);
     console.log(Buffer.byteLength(last_res, 'binary'));
@@ -484,13 +542,14 @@ function lll(msg) {
             getOnlineContent(o);
 
             is_hasOnline = false;
+            continue ;
 
         } else {
         	//global.json_undefined_total++;
         }
     }
 
-    console.log(global.combo_file_object);
+    //console.log(global.combo_file_object);
 
     if (is_hasOnline) {
     	console.log('asdf');
