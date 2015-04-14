@@ -42,6 +42,15 @@ var fs = require("fs"),
     util = require('util');
 
     var async = require("async");
+    var a_json  = {};
+
+ //    var EventEmitter = require('events').EventEmitter;   
+	// var ee = new EventEmitter();
+	// // ee.setMaxListeners(15);
+	// // ee.setMaxListeners(0);
+	// ee._maxListeners = 200;
+
+	
 
 /**
  * www根目录
@@ -230,6 +239,7 @@ function write404(req, res) {
  * 判断文件是否存在,路径问题是否带有“/”
  */
  var exists_i = 0;
+
 function existsFile(filename, req, res, pathname) {
 
 	    path.exists(filename, function(exists) {
@@ -290,22 +300,38 @@ function getFileName(str){
  */
 function comboPress (pathname, req,res) {
 
+	res.setMaxListeners(113100090909090909090909);
+
+	//console.log(res);
+	// global.req = req;
+	// global.res = res;
+
+
+	//console.log(pathname);
+
 	var hashStr = req.url;
 
 	var hash = require("crypto").createHash('sha1').update(hashStr).digest('base64');
 
+	var combo_url = [];
+
 	var filename = [];
+
 	var filename_source = [];
+
 	var filename_t = [];
+
 	for (var i = 0; i < pathname.length; i++) {
 
 		filename_source[i] = pathname[i];
-
+		combo_url[i] = '/'+filename_source[i].split(mock_online_address)[1];
 		pathname[i] = filename_source[i].split(mock_online_address)[1];
 		 
 
 		if (pathname[i] == undefined) {
 
+
+			combo_url[i] = filename_source[i];
 			//取线上
 			pathname[i] = online_host+ ':'+online_port+filename_source[i];
 			
@@ -319,172 +345,165 @@ function comboPress (pathname, req,res) {
 			filename.push(temp);
 		}
 
-		
-
 	}
+
+
+	
 
 	var temp_file = '';
+//var path_arr = [ '/min/static/fa/js/home.js','/test1.js','/min/common/js/sea/sea.js', '/test2.js'];
+	//console.log(combo_url);
+	//console.log(path_arr);
+	console.log(combo_url);
+	combo_url.forEach(function (filepath, index) {
+		//console.log(__dirname+filepath);
+    var k = 'a'+index;
+    console.log(k);
+    a_json[filepath] = function (callback) {
+    	//console.log(__dirname+filepath);
+        fs.readFile(__dirname+filepath, 'binary',  function (err, file_content) {
+            callback(null,file_content);
+            //return ;
+        });
+    }
+});
+
+function getOnlineContent(o) {
+
+    (function (o) {
+    	console.log(1111);
+        var options = {
+            hostname : 'img1sw.baidu.com',
+            port: 80,
+            path: o,
+            method : 'GET'
+        };
+        http.get(options, function (res) {
+        	
+        	res.setMaxListeners(100000000000);
 
-	function seqRequest(i, limit) {
-		 filename_t[i] = filename[i];
-		fs.exists(filename[i], function( exists ) {
+            console.log('状态友：' + res.statusCode);
+            if (res.statusCode == 404) {
+            	write404(global.req, global.res);
 
-			if (exists) {
+ 
+            } else if (res.statusCode == 200) {
 
-				fs.readFile(filename[i], 'utf-8', function (err, file) {
+	            // console.log('响应头：' + JSON.stringify(res.headers));
+	            res.setEncoding('utf8');
+	            var chunks = [];
+	            var content = '';
+	            var size = 0;  
+	            res.on('data', function (chunk) {
 
-					if (err == null) {
-						
-						temp_file += file;
+	                content += chunk;
+	                chunks.push(chunk);
 
-						if (i < limit) {
+	                res.on('end', function () {
+	                    size = size + 1;
+	                    chunks.length;
+	                    global.combo_file_object[o] = '';
 
-							seqRequest(i + 1, filename.length - 1);
+	                    global.combo_file_object[o] = content;
+
+	                    if (size == chunks.length) {
+	                    	//console.log('resetsonresetsonresetsonresetsonresetsonresetson');
+	                    	//console.log(req.headers['if-none-match']);
+	                        resetJson(global.combo_file_object,req,res);        
+
+	                    }
+	                    return ;
+	                });
+
+	                res.on('error', function () {
+	                    console.log('\n\nerror\n\n');
+	                });
+	            });
+            }
+
+        });
+    })(o);
+}
+
+global.json_object_mumber = 0;
+
+function resetJson(obj) {
+    global.json_object_mumber++;
+
+    if (global.json_object_mumber == global.json_undefined_total) {
+
+        global.combo_file_object = obj;
+        getLastContent();
+    }
+}
+
+function getLastContent() {
+    var last_res = '';
+    
+    for (var o in global.combo_file_object) {
+        last_res += global.combo_file_object[o];
+    }
+
+
+
+        res.writeHead(200, {
+
+            "Content-Type" : "text/plain;charset=utf-8",
+
+            "Content-Length" : Buffer.byteLength(last_res, 'utf8'),
+			
 
-						} else {
+           // 11334
 
-							var contentType = mime.lookupExtension(path.extname(temp_file));
+            "Server":"NodeJs(" + process.version + ")"
 
-							if (req.headers['if-none-match'] == hash) {
+        });
 
-								res.writeHead(304);
+        res.write(last_res, 'utf8');
 
-								res.end();
+        //console.log(last_res);
 
-								return;
+        res.end(last_res, 'utf8');
+        last_res = '';
+   // console.log(last_res);
+    console.log(Buffer.byteLength(last_res, 'binary'));
+}
 
-							}
+function lll(msg) {
+    global.combo_file_object = msg;
+    global.json_undefined_total = 0;
+    var is_hasOnline = true;
+    for(var o in msg){ 
+        if (global.combo_file_object[o] == undefined) {
 
-					        res.writeHead(200,{
 
-					            "Content-Type":contentType,
+            global.json_undefined_total++;
 
-					            "Content-Length":Buffer.byteLength(temp_file,'utf-8'),
+            getOnlineContent(o);
 
-					            "Server":"NodeJs("+process.version+")",
+            is_hasOnline = false;
 
-					            "Etag" : hash
+        } else {
+        	//global.json_undefined_total++;
+        }
+    }
 
-					        });
+    console.log(global.combo_file_object);
 
-					        res.write(temp_file,"utf-8");
+    if (is_hasOnline) {
+    	console.log('asdf');
+    	getLastContent();
+    }
+    // console.log();
+    // getLastContent();
 
-					        res.end();
+    //resetJson(global.combo_file_object);
 
-						}
-					} else {
-						if (err.code == 'EISDIR') {
-							 var body="400 Bad Request";
-							res.writeHead(400, {
-
-					        "Content-Type":"text/html;charset=utf-8",
-
-					        "Content-Length":Buffer.byteLength(body,'utf8'),
-
-					        "Server":"NodeJs(" + process.version + ")"
-
-					    });
-
-					    res.write(body);
-
-					    res.end();
-						}
-
-
-					}
-				});
-			} else {
-
-				var reqData='';
-				var post_options = {
-				    host: online_host,
-				    port: online_port,
-				    path: filename_source[i],
-				    method: 'GET',
-				    headers: {
-				      'Content-Type': "text/plain;charset=utf-8",
-				      'Content-Length': reqData.length
-				    }
-				  };
-					//http.get('http://'+online_host+':'+online_port+filename_source[i], function (res) {
-					http.get('http://' + online_host + ':' + filename_source[i], function (response) {
-
-						if (response.statusCode == 404) {
-							var body="文件不存在:-(";
-
-						    res.writeHead(404, {
-
-						        "Content-Type":"text/html;charset=utf-8",
-
-						        "Content-Length":Buffer.byteLength(body,'utf8'),
-
-						        "Server":"NodeJs(" + process.version + ")"
-
-						    });
-
-						    res.write(body);
-
-						    res.end();
-
-						    return ;
-						}
-
-
-
-				         response.on("data",function (chunk) {
-				             temp_file += chunk;
-				 
-				         }).on("end", function () {
-				 
-				            res.writeHead(200, {
-
-						        "Content-Type":"text/plain;charset=utf-8",
-
-						        "Content-Length":Buffer.byteLength(temp_file,'utf8'),
-
-						        "Server":"NodeJs(" + process.version + ")"
-
-						    });
-
-						    res.write(temp_file);
-
-						    res.end();
-				 
-				         }).on('error', function (e) {
-				 			
-				             console.log("Got error: " + e.message);
-				 
-				         });
-
-
-					});
-
-
-				//url combo的文件没有找到怎么办
-
-
-				    // var body="文件不存在:-(";
-
-				    // res.writeHead(404, {
-
-				    //     "Content-Type":"text/html;charset=utf-8",
-
-				    //     "Content-Length":Buffer.byteLength(body,'utf8'),
-
-				    //     "Server":"NodeJs(" + process.version + ")"
-
-				    // });
-
-				    // res.write(body);
-
-				    // res.end();
-			}
-
-		});
-	   
-	}
-
-	seqRequest(0, filename.length - 1);
+}
+async.series(a_json,function(err, results) {
+    lll(results);
+    a_json = {};
+});
 	
 }
 
@@ -546,22 +565,22 @@ http.createServer(function (req, res) {
 					pathname = url.parse(req.url).pathname.split(mock_online_address)[0];
 
 				} else {
+					pathname = url.parse(req.url).pathname;
+					// var body="文件不存在:-(";
 
-					var body="文件不存在:-(";
+				 //    res.writeHead(404, {
 
-				    res.writeHead(404, {
+				 //        "Content-Type":"text/html;charset=utf-8",
 
-				        "Content-Type":"text/html;charset=utf-8",
+				 //        "Content-Length":Buffer.byteLength(body,'utf8'),
 
-				        "Content-Length":Buffer.byteLength(body,'utf8'),
+				 //        "Server":"NodeJs(" + process.version + ")"
 
-				        "Server":"NodeJs(" + process.version + ")"
+				 //    });
 
-				    });
+				 //    res.write(body);
 
-				    res.write(body);
-
-				    res.end();
+				 //    res.end();
 				}
 
 			} else {
@@ -603,9 +622,9 @@ http.createServer(function (req, res) {
 				pathname = url.parse(req.url).pathname.split(mock_online_address)[1];
 
 			} else {
-
+				//pathname = '/' + pathname;
 				//把文件和路径切出来
-
+	
 				pathname = url.parse(req.url).pathname.split(mock_online_address)[1];
 
 			}
