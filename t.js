@@ -1,4 +1,5 @@
 var moment = require('moment');
+var fs = require('fs');
 
 exports.inc = function(n, callback, timeout) {
     timeout = timeout || 200;
@@ -13,6 +14,23 @@ exports.fire = function(obj, callback, timeout) {
         callback(null, obj);
     }, timeout);
 };
+
+exports.getLocationContent = function(i, file_path, obj, callback, timeout) {
+     console.log(i,file_path);
+    timeout = timeout || 200;
+    setTimeout(function () {
+
+        fs.readFile(file_path, 'utf8', function (err, data) {
+            //console.log(err, data);
+            //console.log(data);
+           // global.temp_data += data;
+            callback(i,file_path,data);
+        });
+        
+    },timeout);
+};
+
+
 
 exports.err = function(errMsg, callback, timeout) {
     timeout = timeout || 200;
